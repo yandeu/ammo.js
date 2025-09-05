@@ -14,10 +14,12 @@
   "homepage": "https://github.com/kripken/ammo.js",
   "devDependencies": {
     "ava": "^3.11.0",
-    "http-server": "^0.12.3"
+    "http-server": "^0.12.3",
+    "webidl-dts-gen": "^1.11.3"
   },
   "scripts": {
-    "build": "cmake -B builds -DCLOSURE=1 && cmake --build builds",
+    "build": "cmake -B builds -DCLOSURE=1 && cmake --build builds && npm run types",
+    "types": "npx webidl-dts-gen -e -i ammo.idl -n Ammo -o builds/ammo.d.ts",
     "test": "npm run test-js && npm run test-wasm",
     "test-js": "AMMO_PATH=builds/ammo.js ava",
     "test-wasm": "AMMO_PATH=builds/ammo.wasm.js ava"
