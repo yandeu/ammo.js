@@ -10,7 +10,7 @@ set(AMMO_FRONT_MATTER_FILE ${CMAKE_CURRENT_SOURCE_DIR}/front-matter.js)
 set(AMMO_HEADER_FILE ${CMAKE_CURRENT_SOURCE_DIR}/ammo.h)
 set(AMMO_IDL_FILE ${CMAKE_CURRENT_SOURCE_DIR}/ammo.idl)
 set(AMMO_ONLOAD_FILE ${CMAKE_CURRENT_SOURCE_DIR}/onload.js)
-set(BULLET_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/bullet/src/)
+set(BULLET_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/bullet3/src/)
 
 
 set(BULLET_TARGETS BulletCollision BulletDynamics BulletSoftBody LinearMath)
@@ -80,7 +80,7 @@ set(EMCC_GLUE_ARGS
 
 #######################################
 project("ammo")
-add_subdirectory(bullet EXCLUDE_FROM_ALL)
+add_subdirectory(bullet3 EXCLUDE_FROM_ALL)
 
 
 #######################################
