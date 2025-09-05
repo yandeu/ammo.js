@@ -17,6 +17,7 @@
     "http-server": "^0.12.3"
   },
   "scripts": {
+    "build": "cmake -B builds -DCLOSURE=1 && cmake --build builds",
     "test": "npm run test-js && npm run test-wasm",
     "test-js": "AMMO_PATH=builds/ammo.js ava",
     "test-wasm": "AMMO_PATH=builds/ammo.wasm.js ava"
