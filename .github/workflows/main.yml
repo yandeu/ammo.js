@@ -1,0 +1,46 @@
+name: 'CI'
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: '3.28.x'
+
+      - uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: 4.0.7
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.x'
+
+      - name: Emscripten Version
+        run: emcc -v
+
+      - name: Python Version
+        run: python -V
+
+      - name: CMake Version
+        run: cmake --version
+
+      - name: Node.js Version
+        run: node -v
+
+      - name: Install Node.js dependencies
+        run: npm ci
+
+      - name: Build
+        run: |
+          cmake -B builds -DCLOSURE=1
+          cmake --build builds
+
+      - name: Test
+        run: npm test
