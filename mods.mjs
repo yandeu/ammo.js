@@ -82,12 +82,12 @@ ${comment_lines(get_license_header(HACD))}
  	}
 };
 
-#endif //BT_DISCRETE_DYNAMICS_WORLD_H`
+#endif  //BT_DISCRETE_DYNAMICS_WORLD_H`
   const searchValue = new RegExp(
     `
 };
 
-#endif //BT_DISCRETE_DYNAMICS_WORLD_H`,
+#endif  //BT_DISCRETE_DYNAMICS_WORLD_H`,
     'gm'
   )
 
@@ -103,13 +103,13 @@ ${comment_lines(get_license_header(HACD))}
 {
   const filePath = join(BULLET_PATH, 'src', 'BulletDynamics', 'Dynamics', 'btDynamicsWorld.h')
   let file = await readFile(filePath, options)
-  const replaceValue = `		// XXX AMMO overloaded for callback type compatibility with emscripten WebIDL
-		void setInternalTickCallback(void* cb, void* worldUserInfo=0, bool isPreTick=false) {
-			setInternalTickCallback((btInternalTickCallback)cb, worldUserInfo, isPreTick);
-		}
+  const replaceValue = `	// XXX AMMO overloaded for callback type compatibility with emscripten WebIDL
+  void setInternalTickCallback(void* cb, void* worldUserInfo=0, bool isPreTick=false) {
+    setInternalTickCallback((btInternalTickCallback)cb, worldUserInfo, isPreTick);
+  }
 
-		void	setWorldUserInfo(void* worldUserInfo)`
-  const searchValue = `		void	setWorldUserInfo(void* worldUserInfo)`
+	void setWorldUserInfo(void* worldUserInfo)`
+  const searchValue = `	void setWorldUserInfo(void* worldUserInfo)`
 
   if (!file.includes('XXX AMMO')) {
     if (!file.includes(searchValue)) throw 'searchValue not found! [btDynamicsWorld.h]'
