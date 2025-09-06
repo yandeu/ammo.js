@@ -805,14 +805,44 @@ declare module Ammo {
     class btConeTwistConstraint extends btTypedConstraint {
         constructor(rbA: btRigidBody, rbB: btRigidBody, rbAFrame: btTransform, rbBFrame: btTransform);
         constructor(rbA: btRigidBody, rbAFrame: btTransform);
+        updateRHS(timeStep: number): void;
+        getRigidBodyA(): btRigidBody;
+        getRigidBodyB(): btRigidBody;
+        getAFrame(): btTransform;
+        getBFrame(): btTransform;
+        getSolveTwistLimit(): number;
+        getSolveSwingLimit(): number;
+        getTwistLimitSign(): number;
+        calcAngleInfo(): void;
+        calcAngleInfo2(transA: btTransform, transB: btTransform, invInertiaWorldA: btMatrix3x3, invInertiaWorldB: btMatrix3x3): void;
+        getSwingSpan1(): number;
+        getSwingSpan2(): number;
+        getTwistSpan(): number;
+        getLimitSoftness(): number;
+        getBiasFactor(): number;
+        getRelaxationFactor(): number;
+        getTwistAngle(): number;
+        isPastSwingLimit(): boolean;
+        getLimit(limitIndex: number): number;
+        getDamping(): number;
         setLimit(limitIndex: number, limitValue: number): void;
         setAngularOnly(angularOnly: boolean): void;
         setDamping(damping: number): void;
         enableMotor(b: boolean): void;
+        isMotorEnabled(): boolean;
+        getMaxMotorImpulse(): number;
+        isMaxMotorImpulseNormalized(): boolean;
         setMaxMotorImpulse(maxMotorImpulse: number): void;
         setMaxMotorImpulseNormalized(maxMotorImpulse: number): void;
         setMotorTarget(q: btQuaternion): void;
         setMotorTargetInConstraintSpace(q: btQuaternion): void;
+        getFlags(): number;
+        getFixThresh(): number;
+        setFixThresh(fixThresh: number): void;
+        getMotorTarget(): btQuaternion;
+        GetPointForAngle(fAngleInRadians: number, fLength: number): btVector3;
+        getFrameOffsetA(): btTransform;
+        getFrameOffsetB(): btTransform;
     }
     class btHingeConstraint extends btTypedConstraint {
         constructor(rbA: btRigidBody, rbB: btRigidBody, pivotInA: btVector3, pivotInB: btVector3, axisInA: btVector3, axisInB: btVector3, useReferenceFrameA?: boolean);
@@ -1110,8 +1140,7 @@ declare module Ammo {
         updateAction(collisionWorld: btCollisionWorld, deltaTimeStep: number): void;
     }
     class btKinematicCharacterController extends btActionInterface {
-        constructor(ghostObject: btPairCachingGhostObject, convexShape: btConvexShape, stepHeight: number, upAxis?: number);
-        setUpAxis(axis: number): void;
+        constructor(ghostObject: btPairCachingGhostObject, convexShape: btConvexShape, stepHeight: number, up: btVector3);
         setWalkDirection(walkDirection: btVector3): void;
         setVelocityForTimeInterval(velocity: btVector3, timeInterval: number): void;
         warp(origin: btVector3): void;
@@ -1122,14 +1151,15 @@ declare module Ammo {
         setMaxJumpHeight(maxJumpHeight: number): void;
         canJump(): boolean;
         jump(): void;
-        setGravity(gravity: number): void;
-        getGravity(): number;
+        setGravity(gravity: btVector3): void;
+        getGravity(): btVector3;
         setMaxSlope(slopeRadians: number): void;
         getMaxSlope(): number;
         getGhostObject(): btPairCachingGhostObject;
         setUseGhostSweepTest(useGhostObjectSweepTest: boolean): void;
         onGround(): boolean;
         setUpInterpolate(value: boolean): void;
+        setUp(up: btVector3): void;
     }
     class btRaycastVehicle extends btActionInterface {
         constructor(tuning: btVehicleTuning, chassis: btRigidBody, raycaster: btVehicleRaycaster);
@@ -1436,5 +1466,29 @@ declare module Ammo {
         CreateEllipsoid(worldInfo: btSoftBodyWorldInfo, center: btVector3, radius: btVector3, res: number): btSoftBody;
         CreateFromTriMesh(worldInfo: btSoftBodyWorldInfo, vertices: ReadonlyArray<number>, triangles: ReadonlyArray<number>, ntriangles: number, randomizeConstraints: boolean): btSoftBody;
         CreateFromConvexHull(worldInfo: btSoftBodyWorldInfo, vertices: btVector3, nvertices: number, randomizeConstraints: boolean): btSoftBody;
+    }
+    class Vec3Long {
+        constructor(x: number, y: number, z: number);
+        X(): number;
+        Y(): number;
+        Z(): number;
+    }
+    class Vec3Real {
+        constructor(x: number, y: number, z: number);
+        X(): number;
+        Y(): number;
+        Z(): number;
+    }
+    class HACD {
+        constructor();
+        SetPoints(points: Vec3Real): void;
+        SetNPoints(nPoints: number): void;
+        SetTriangles(triangles: Vec3Long): void;
+        SetNTriangles(nTriangles: number): void;
+        Compute(): void;
+        GetNClusters(): number;
+        GetNPointsCH(c: number): number;
+        GetNTrianglesCH(c: number): number;
+        GetCH(c: number, points: Vec3Real, triangles: Vec3Long): number;
     }
 }
