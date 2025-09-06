@@ -808,15 +808,53 @@ interface btSequentialImpulseConstraintSolver {
 interface btConeTwistConstraint {
   void btConeTwistConstraint([Ref] btRigidBody rbA, [Ref] btRigidBody rbB, [Ref] btTransform rbAFrame, [Ref] btTransform rbBFrame);
   void btConeTwistConstraint([Ref] btRigidBody rbA, [Ref] btTransform rbAFrame);
+  void updateRHS(float	timeStep);
+
+  [Const, Ref] btRigidBody getRigidBodyA();
+  [Const, Ref] btRigidBody getRigidBodyB();
+  [Const, Ref] btTransform getAFrame();
+  [Const, Ref] btTransform getBFrame();
+
+  long getSolveTwistLimit();
+  long getSolveSwingLimit();
+  float getTwistLimitSign();
+  void calcAngleInfo();
+  void calcAngleInfo2([Const, Ref] btTransform transA, [Const, Ref] btTransform transB, [Const, Ref] btMatrix3x3 invInertiaWorldA, [Const, Ref] btMatrix3x3 invInertiaWorldB);
+
+  float getSwingSpan1();
+  float getSwingSpan2();
+  float getTwistSpan();
+  float getLimitSoftness();
+  float getBiasFactor();
+  float getRelaxationFactor();
+  float getTwistAngle();	
+  boolean isPastSwingLimit(); 
+
+  [Const] float getLimit(long limitIndex);
+  [Const] float getDamping();
 
   void setLimit(long limitIndex, float limitValue);
   void setAngularOnly(boolean angularOnly);
   void setDamping(float damping);
+
   void enableMotor(boolean b);
+  [Const] boolean isMotorEnabled();
+  [Const] float getMaxMotorImpulse();
+  [Const] boolean isMaxMotorImpulseNormalized();
   void setMaxMotorImpulse(float maxMotorImpulse);
   void setMaxMotorImpulseNormalized(float maxMotorImpulse);
   void setMotorTarget([Const,Ref] btQuaternion q);
   void setMotorTargetInConstraintSpace([Const,Ref] btQuaternion q);
+
+  long getFlags();
+
+  float getFixThresh();
+  void setFixThresh(float fixThresh);
+
+  [Const, Ref] btQuaternion getMotorTarget();
+  [Value] btVector3 GetPointForAngle(float fAngleInRadians, float fLength);
+  [Const, Ref] btTransform getFrameOffsetA();
+  [Const, Ref] btTransform getFrameOffsetB();
 };
 btConeTwistConstraint implements btTypedConstraint;
 

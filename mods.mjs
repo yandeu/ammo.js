@@ -55,6 +55,22 @@ ${comment_lines(get_license_header(HACD))}
   await writeFile(filePath, text, options)
 }
 
+// ## modify btIDebugDraw.h
+{
+  {
+    const filePath = join(BULLET_PATH, 'src', 'LinearMath', 'btIDebugDraw.h')
+    let file = await readFile(filePath, options)
+    const searchValue = 'if (!nSteps) nSteps = 1;'
+    const appendValue = 'if (nSteps > 1000) nSteps = 1;'
+
+    if (!file.includes(searchValue)) throw 'searchValue not found! [btIDebugDraw.h]'
+    if (!file.includes(appendValue)) {
+      file = file.replace(searchValue, searchValue + '\n' + appendValue)
+      await writeFile(filePath, file, options)
+    }
+  }
+}
+
 // ## AMMO Changed CMAKE_SOURCE_DIR to CMAKE_CURRENT_SOURCE_DIR in bullet3/CMakeLists.txt
 // (see: https://github.com/kripken/ammo.js/commit/36e4612a098f71e147f08c8a4c42cbdbb48429f9)
 {
