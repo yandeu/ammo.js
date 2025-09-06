@@ -1279,3 +1279,34 @@ interface btSoftBodyHelpers {
   btSoftBody CreateFromTriMesh([Ref] btSoftBodyWorldInfo worldInfo, float[] vertices, long[] triangles, long ntriangles, boolean randomizeConstraints);
   btSoftBody CreateFromConvexHull([Ref] btSoftBodyWorldInfo worldInfo, [Const] btVector3 vertices, long nvertices, boolean randomizeConstraints);
 };
+
+// extras
+
+interface Vec3Long {
+  void Vec3Long(long x, long y, long z);
+  long X();
+  long Y();
+  long Z();
+};
+
+interface Vec3Real {
+  void Vec3Real(double x, double y, double z);
+  double X();
+  double Y();
+  double Z();
+};
+
+[Prefix="HACD::"]
+interface HACD {
+  void HACD();
+  void SetPoints(Vec3Real points);
+  void SetNPoints(long nPoints);
+  void SetTriangles(Vec3Long triangles);
+  void SetNTriangles(long nTriangles);
+
+  void Compute();
+  long GetNClusters();
+  long GetNPointsCH(long c);
+  long GetNTrianglesCH(long c);
+  long GetCH(long c, Vec3Real points, Vec3Long triangles);
+};

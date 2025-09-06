@@ -11,9 +11,10 @@ set(AMMO_HEADER_FILE ${CMAKE_CURRENT_SOURCE_DIR}/ammo.h)
 set(AMMO_IDL_FILE ${CMAKE_CURRENT_SOURCE_DIR}/ammo.idl)
 set(AMMO_ONLOAD_FILE ${CMAKE_CURRENT_SOURCE_DIR}/onload.js)
 set(BULLET_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/bullet3/src/)
+set(BULLET_EXTRAS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/bullet3/Extras/)
 
 
-set(BULLET_TARGETS BulletCollision BulletDynamics BulletSoftBody LinearMath)
+set(BULLET_TARGETS BulletCollision BulletDynamics BulletSoftBody LinearMath HACD)
 foreach(_TARGET ${BULLET_TARGETS})
   list(APPEND BULLET_LIBS $<TARGET_FILE:${_TARGET}>)
 endforeach()
@@ -73,6 +74,7 @@ set(EMCC_WASM_ARGS ${EMCC_ARGS}
 
 set(EMCC_GLUE_ARGS
   -c
+  -I${BULLET_EXTRAS_DIR}
   -I${BULLET_SRC_DIR}
   -include${AMMO_HEADER_FILE})
 
