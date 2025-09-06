@@ -6,6 +6,55 @@ import { join, resolve } from 'node:path'
 const BULLET_PATH = resolve('./bullet3')
 const options = { encoding: 'utf-8' }
 
+/**
+ *
+ * @param {string} file
+ */
+function get_license_header(file) {
+  let m = file.match(/^(\/\*\*?)(.*?)(?=\*\/)(\*\/)/s)
+  if (!m) throw 'No License Header found!'
+  return m[2]
+}
+
+function comment_lines(file) {
+  let lines = file.split(/\r?\n/)
+  lines = lines.map(l => '// ' + l)
+  return lines.join('\n')
+}
+
+// ## modify front-matter.js
+{
+  const LICENSE = await readFile('LICENSE', options)
+  const AUTHORS = await readFile('AUTHORS', options)
+  const HACD = await readFile(join(BULLET_PATH, 'Extras', 'HACD', 'hacdHACD.h'), options)
+
+  let version = 'UNKNOWN'
+  {
+    const filePath = join(BULLET_PATH, 'VERSION')
+    let file = await readFile(filePath, options)
+    version = file.split('\n')[0]
+  }
+  const text = `// This is ammo.js, a port of Bullet Physics to JavaScript. zlib licensed.
+
+// -- About --
+// This version of ammo.js was built by @yandeu (https://github.com/yandeu/ammo.js)
+// and is based on Bullet version ${version}, and it includes one or more Bullet Physics Extras.
+
+// -- LICENSE --
+${comment_lines(LICENSE)}
+
+// -- AUTHORS --
+${comment_lines(AUTHORS)}
+
+// -- HACD Extra --
+${comment_lines(get_license_header(HACD))}
+`
+
+  const filePath = 'front-matter.js'
+  // let file = await readFile(filePath, options)
+  await writeFile(filePath, text, options)
+}
+
 // ## AMMO Changed CMAKE_SOURCE_DIR to CMAKE_CURRENT_SOURCE_DIR in bullet3/CMakeLists.txt
 // (see: https://github.com/kripken/ammo.js/commit/36e4612a098f71e147f08c8a4c42cbdbb48429f9)
 {
