@@ -1022,9 +1022,8 @@ interface btActionInterface {
 };
 
 interface btKinematicCharacterController {
-  void btKinematicCharacterController(btPairCachingGhostObject ghostObject, btConvexShape convexShape, float stepHeight, optional long upAxis);
+  void btKinematicCharacterController(btPairCachingGhostObject ghostObject, btConvexShape convexShape, float stepHeight, [Ref] btVector3 up);
 
-  void setUpAxis (long axis);
   void setWalkDirection ([Const,Ref] btVector3 walkDirection);
   void setVelocityForTimeInterval ([Const,Ref] btVector3 velocity, float timeInterval);
   //void reset ();
@@ -1036,14 +1035,15 @@ interface btKinematicCharacterController {
   void setMaxJumpHeight (float maxJumpHeight);
   boolean canJump ();
   void jump ();
-  void setGravity (float gravity);
-  float getGravity ();
+  void setGravity ([Const, Ref] btVector3 gravity);
+  [Value] btVector3 getGravity ();
   void setMaxSlope (float slopeRadians);
   float getMaxSlope ();
   btPairCachingGhostObject getGhostObject ();
   void setUseGhostSweepTest (boolean useGhostObjectSweepTest);
   boolean onGround ();
   void setUpInterpolate (boolean value);
+  void setUp ([Const,Ref] btVector3 up);
 };
 btKinematicCharacterController implements btActionInterface;
 
