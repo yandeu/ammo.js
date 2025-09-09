@@ -25,6 +25,7 @@ interface btVector3 {
   void btVector3();
   void btVector3(float x, float y, float z);
   float length();
+  float length2();
   float x();
   float y();
   float z();
@@ -270,11 +271,15 @@ interface ClosestConvexResultCallback {
 ClosestConvexResultCallback implements ConvexResultCallback;
 
 interface btCollisionShape {
+  void calculateTemporalAabb([Const, Ref] btTransform curTrans, [Const, Ref] btVector3 linvel,[Const, Ref] btVector3 angvel,float timeStep, [Ref] btVector3 temporalAabbMin, [Ref]btVector3 temporalAabbMax);
+  long getShapeType();
   void setLocalScaling([Const, Ref] btVector3 scaling);
   [Const, Ref] btVector3 getLocalScaling();
   void calculateLocalInertia(float mass, [Ref] btVector3 inertia);
   void setMargin(float margin);
   float getMargin();
+  VoidPtr getUserPointer();
+  void setUserPointer(VoidPtr userPointer);
 };
 
 interface btConvexShape {
@@ -352,6 +357,12 @@ btMultiSphereShape implements btCollisionShape;
 
 interface btConeShape {
   void btConeShape(float radius, float height);
+  float getRadius();
+	float getHeight();
+  void setRadius(float radius);
+  void setHeight(float height);
+  void setConeUpIndex(long upIndex);		
+  long getConeUpIndex();
 };
 btConeShape implements btCollisionShape;
 
@@ -405,12 +416,14 @@ btConvexHullShape implements btCollisionShape;
 interface btShapeHull {
   void btShapeHull(btConvexShape shape);
   boolean buildHull(float margin);
+  long numTriangles();
   long numVertices();
+  long numIndices();
   [Const] btVector3 getVertexPointer();
 };
 
 interface btCompoundShape {
-  void btCompoundShape(optional boolean enableDynamicAabbTree);
+  void btCompoundShape(optional boolean enableDynamicAabbTree, [Const] long initialChildCapacity);
   void addChildShape([Const, Ref] btTransform localTransform, btCollisionShape shape);
   void removeChildShape(btCollisionShape shape);
   void removeChildShapeByIndex(long childShapeindex);
@@ -660,6 +673,7 @@ interface btOverlappingPairCallback {
 
 interface btOverlappingPairCache {
   void setInternalGhostPairCallback(btOverlappingPairCallback ghostPairCallback);
+  void removeOverlappingPairsContainingProxy(btBroadphaseProxy proxy, btDispatcher dispatcher);
   [Const] float getNumOverlappingPairs();
 };
 
@@ -676,7 +690,9 @@ interface btCollisionConfiguration {
 
 interface btDbvtBroadphase {
   void btDbvtBroadphase();
+  btOverlappingPairCache getOverlappingPairCache();
 };
+btDbvtBroadphase implements btBroadphaseInterface;
 
 interface btBroadphaseProxy {
   attribute long m_collisionFilterGroup;
@@ -751,12 +767,41 @@ interface btConstraintSetting {
   attribute float m_impulseClamp;
 };
 
+interface btJointFeedback
+{
+	// BT_DECLARE_ALIGNED_ALLOCATOR();
+	[Value] attribute btVector3 m_appliedForceBodyA;
+	[Value] attribute btVector3 m_appliedTorqueBodyA;
+	[Value] attribute btVector3 m_appliedForceBodyB;
+	[Value] attribute btVector3 m_appliedTorqueBodyB;
+};
+
+enum btTypedConstraintType {
+	"POINT2POINT_CONSTRAINT_TYPE",
+	"HINGE_CONSTRAINT_TYPE",
+	"CONETWIST_CONSTRAINT_TYPE",
+	"D6_CONSTRAINT_TYPE",
+	"SLIDER_CONSTRAINT_TYPE",
+	"CONTACT_CONSTRAINT_TYPE",
+	"D6_SPRING_CONSTRAINT_TYPE",
+	"GEAR_CONSTRAINT_TYPE",
+	"FIXED_CONSTRAINT_TYPE",
+	"D6_SPRING_2_CONSTRAINT_TYPE",
+	"MAX_CONSTRAINT_TYPE"
+};
+
 interface btTypedConstraint {
   void enableFeedback(boolean needsFeedback);
   [Const] float getBreakingImpulseThreshold();
   void setBreakingImpulseThreshold([Const] float threshold);
   [Const] float getParam(long num, long axis);
   void setParam(long num, float value, long axis);
+  [Const] boolean needsFeedback();
+  [Const] long getUid();
+  [Const] float getAppliedImpulse();
+  [Const] btTypedConstraintType getConstraintType();
+  void setDbgDrawSize(float dbgDrawSize);
+  float getDbgDrawSize();
 };
 
 enum btConstraintParams {
@@ -781,11 +826,30 @@ btPoint2PointConstraint implements btTypedConstraint;
 interface btGeneric6DofConstraint {
   void btGeneric6DofConstraint([Ref] btRigidBody rbA, [Ref] btRigidBody rbB, [Ref] btTransform frameInA, [Ref] btTransform frameInB, boolean useLinearFrameReferenceFrameA);
   void btGeneric6DofConstraint([Ref] btRigidBody rbB, [Ref] btTransform frameInB, boolean useLinearFrameReferenceFrameB);
+
+	void calculateTransforms();
+  void buildJacobian();
+
+  [Const, Ref] btTransform getCalculatedTransformA();
+  [Const, Ref] btTransform getCalculatedTransformB();
+  [Const, Ref] btTransform getFrameOffsetA();
+  [Const, Ref] btTransform getFrameOffsetB();
+
+  [Value] btVector3 getAxis(long axis_index);
+  float getAngle(long axis_index);
+  float getRelativePivotPosition(long axis_index);
+  void setFrames([Const, Ref] btTransform frameA, [Const, Ref] btTransform frameB);
+  boolean testAngularLimitMotor(long axis_index);
+
+  void getLinearLowerLimit([Ref] btVector3 linearLower);
+  void getLinearUpperLimit([Ref] btVector3 linearUpper);
+  void getAngularLowerLimit([Ref] btVector3 angularLower);
+  void getAngularUpperLimit([Ref] btVector3 angularUpper);
+
   void setLinearLowerLimit([Const, Ref] btVector3 linearLower);
   void setLinearUpperLimit([Const, Ref] btVector3 linearUpper);
   void setAngularLowerLimit([Const, Ref] btVector3 angularLower);
   void setAngularUpperLimit([Const, Ref] btVector3 angularUpper);
-  [Const, Ref] btTransform getFrameOffsetA();
 };
 btGeneric6DofConstraint implements btTypedConstraint;
 
@@ -846,15 +910,14 @@ interface btConeTwistConstraint {
   void setMotorTarget([Const,Ref] btQuaternion q);
   void setMotorTargetInConstraintSpace([Const,Ref] btQuaternion q);
 
-  long getFlags();
-
+	long getFlags();
   float getFixThresh();
-  void setFixThresh(float fixThresh);
+	void setFixThresh(float fixThresh);
 
-  [Const, Ref] btQuaternion getMotorTarget();
-  [Value] btVector3 GetPointForAngle(float fAngleInRadians, float fLength);
-  [Const, Ref] btTransform getFrameOffsetA();
-  [Const, Ref] btTransform getFrameOffsetB();
+	[Const, Ref] btQuaternion getMotorTarget();
+	[Value] btVector3 GetPointForAngle(float fAngleInRadians, float fLength);
+	[Const, Ref] btTransform getFrameOffsetA();
+	[Const, Ref] btTransform getFrameOffsetB();
 };
 btConeTwistConstraint implements btTypedConstraint;
 
@@ -928,6 +991,7 @@ interface btCollisionWorld {
   void convexSweepTest([Const] btConvexShape castShape, [Const, Ref] btTransform from, [Const, Ref] btTransform to, [Ref] ConvexResultCallback resultCallback, float allowedCcdPenetration);
   void contactPairTest(btCollisionObject colObjA, btCollisionObject colObjB, [Ref] ContactResultCallback resultCallback);
   void contactTest(btCollisionObject colObj, [Ref] ContactResultCallback resultCallback);
+  void setForceUpdateAllAabbs(boolean forceUpdateAllAabbs);
   void updateSingleAabb(btCollisionObject colObj);
   void setDebugDrawer(btIDebugDraw debugDrawer);
   btIDebugDraw getDebugDrawer();
@@ -1337,6 +1401,13 @@ interface Vec3Real {
 [Prefix="HACD::"]
 interface HACD {
   void HACD();
+
+  void SetCompacityWeight(double alpha);
+  void SetVolumeWeight(double beta);
+  void SetConcavity(double concavity);
+  void SetNClusters(long nClusters);
+  void SetNVerticesPerCH(long nVerticesPerCH);
+
   void SetPoints(Vec3Real points);
   void SetNPoints(long nPoints);
   void SetTriangles(Vec3Long triangles);
