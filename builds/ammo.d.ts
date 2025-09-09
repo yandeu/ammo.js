@@ -36,6 +36,7 @@ declare module Ammo {
         constructor();
         constructor(x: number, y: number, z: number);
         length(): number;
+        length2(): number;
         x(): number;
         y(): number;
         z(): number;
@@ -306,11 +307,15 @@ declare module Ammo {
         m_hitPointWorld: btVector3;
     }
     class btCollisionShape {
+        calculateTemporalAabb(curTrans: btTransform, linvel: btVector3, angvel: btVector3, timeStep: number, temporalAabbMin: btVector3, temporalAabbMax: btVector3): void;
+        getShapeType(): number;
         setLocalScaling(scaling: btVector3): void;
         getLocalScaling(): btVector3;
         calculateLocalInertia(mass: number, inertia: btVector3): void;
         setMargin(margin: number): void;
         getMargin(): number;
+        getUserPointer(): unknown;
+        setUserPointer(userPointer: unknown): void;
     }
     class btConvexShape extends btCollisionShape {
     }
@@ -365,6 +370,12 @@ declare module Ammo {
     }
     class btConeShape extends btCollisionShape {
         constructor(radius: number, height: number);
+        getRadius(): number;
+        getHeight(): number;
+        setRadius(radius: number): void;
+        setHeight(height: number): void;
+        setConeUpIndex(upIndex: number): void;
+        getConeUpIndex(): number;
     }
     class btConeShapeX extends btConeShape {
         constructor(radius: number, height: number);
@@ -413,11 +424,13 @@ declare module Ammo {
     class btShapeHull {
         constructor(shape: btConvexShape);
         buildHull(margin: number): boolean;
+        numTriangles(): number;
         numVertices(): number;
+        numIndices(): number;
         getVertexPointer(): btVector3;
     }
     class btCompoundShape extends btCollisionShape {
-        constructor(enableDynamicAabbTree?: boolean);
+        constructor(enableDynamicAabbTree?: boolean, initialChildCapacity: number);
         addChildShape(localTransform: btTransform, shape: btCollisionShape): void;
         removeChildShape(shape: btCollisionShape): void;
         removeChildShapeByIndex(childShapeindex: number): void;
@@ -645,6 +658,7 @@ declare module Ammo {
     }
     class btOverlappingPairCache {
         setInternalGhostPairCallback(ghostPairCallback: btOverlappingPairCallback): void;
+        removeOverlappingPairsContainingProxy(proxy: btBroadphaseProxy, dispatcher: btDispatcher): void;
         getNumOverlappingPairs(): number;
     }
     class btAxisSweep3 {
@@ -655,8 +669,9 @@ declare module Ammo {
     }
     class btCollisionConfiguration {
     }
-    class btDbvtBroadphase {
+    class btDbvtBroadphase extends btBroadphaseInterface {
         constructor();
+        getOverlappingPairCache(): btOverlappingPairCache;
     }
     class btBroadphaseProxy {
         get_m_collisionFilterGroup(): number;
@@ -753,12 +768,55 @@ declare module Ammo {
         set_m_impulseClamp(m_impulseClamp: number): void;
         m_impulseClamp: number;
     }
+    class btJointFeedback {
+        get_m_appliedForceBodyA(): btVector3;
+        set_m_appliedForceBodyA(m_appliedForceBodyA: btVector3): void;
+        m_appliedForceBodyA: btVector3;
+        get_m_appliedTorqueBodyA(): btVector3;
+        set_m_appliedTorqueBodyA(m_appliedTorqueBodyA: btVector3): void;
+        m_appliedTorqueBodyA: btVector3;
+        get_m_appliedForceBodyB(): btVector3;
+        set_m_appliedForceBodyB(m_appliedForceBodyB: btVector3): void;
+        m_appliedForceBodyB: btVector3;
+        get_m_appliedTorqueBodyB(): btVector3;
+        set_m_appliedTorqueBodyB(m_appliedTorqueBodyB: btVector3): void;
+        m_appliedTorqueBodyB: btVector3;
+    }
+    const POINT2POINT_CONSTRAINT_TYPE: number;
+    const HINGE_CONSTRAINT_TYPE: number;
+    const CONETWIST_CONSTRAINT_TYPE: number;
+    const D6_CONSTRAINT_TYPE: number;
+    const SLIDER_CONSTRAINT_TYPE: number;
+    const CONTACT_CONSTRAINT_TYPE: number;
+    const D6_SPRING_CONSTRAINT_TYPE: number;
+    const GEAR_CONSTRAINT_TYPE: number;
+    const FIXED_CONSTRAINT_TYPE: number;
+    const D6_SPRING_2_CONSTRAINT_TYPE: number;
+    const MAX_CONSTRAINT_TYPE: number;
+    type btTypedConstraintType = typeof POINT2POINT_CONSTRAINT_TYPE | typeof HINGE_CONSTRAINT_TYPE | typeof CONETWIST_CONSTRAINT_TYPE | typeof D6_CONSTRAINT_TYPE | typeof SLIDER_CONSTRAINT_TYPE | typeof CONTACT_CONSTRAINT_TYPE | typeof D6_SPRING_CONSTRAINT_TYPE | typeof GEAR_CONSTRAINT_TYPE | typeof FIXED_CONSTRAINT_TYPE | typeof D6_SPRING_2_CONSTRAINT_TYPE | typeof MAX_CONSTRAINT_TYPE;
+    function _emscripten_enum_btTypedConstraintType_POINT2POINT_CONSTRAINT_TYPE(): btTypedConstraintType;
+    function _emscripten_enum_btTypedConstraintType_HINGE_CONSTRAINT_TYPE(): btTypedConstraintType;
+    function _emscripten_enum_btTypedConstraintType_CONETWIST_CONSTRAINT_TYPE(): btTypedConstraintType;
+    function _emscripten_enum_btTypedConstraintType_D6_CONSTRAINT_TYPE(): btTypedConstraintType;
+    function _emscripten_enum_btTypedConstraintType_SLIDER_CONSTRAINT_TYPE(): btTypedConstraintType;
+    function _emscripten_enum_btTypedConstraintType_CONTACT_CONSTRAINT_TYPE(): btTypedConstraintType;
+    function _emscripten_enum_btTypedConstraintType_D6_SPRING_CONSTRAINT_TYPE(): btTypedConstraintType;
+    function _emscripten_enum_btTypedConstraintType_GEAR_CONSTRAINT_TYPE(): btTypedConstraintType;
+    function _emscripten_enum_btTypedConstraintType_FIXED_CONSTRAINT_TYPE(): btTypedConstraintType;
+    function _emscripten_enum_btTypedConstraintType_D6_SPRING_2_CONSTRAINT_TYPE(): btTypedConstraintType;
+    function _emscripten_enum_btTypedConstraintType_MAX_CONSTRAINT_TYPE(): btTypedConstraintType;
     class btTypedConstraint {
         enableFeedback(needsFeedback: boolean): void;
         getBreakingImpulseThreshold(): number;
         setBreakingImpulseThreshold(threshold: number): void;
         getParam(num: number, axis: number): number;
         setParam(num: number, value: number, axis: number): void;
+        needsFeedback(): boolean;
+        getUid(): number;
+        getAppliedImpulse(): number;
+        getConstraintType(): btTypedConstraintType;
+        setDbgDrawSize(dbgDrawSize: number): void;
+        getDbgDrawSize(): number;
     }
     const BT_CONSTRAINT_ERP: number;
     const BT_CONSTRAINT_STOP_ERP: number;
@@ -783,11 +841,25 @@ declare module Ammo {
     class btGeneric6DofConstraint extends btTypedConstraint {
         constructor(rbA: btRigidBody, rbB: btRigidBody, frameInA: btTransform, frameInB: btTransform, useLinearFrameReferenceFrameA: boolean);
         constructor(rbB: btRigidBody, frameInB: btTransform, useLinearFrameReferenceFrameB: boolean);
+        calculateTransforms(): void;
+        buildJacobian(): void;
+        getCalculatedTransformA(): btTransform;
+        getCalculatedTransformB(): btTransform;
+        getFrameOffsetA(): btTransform;
+        getFrameOffsetB(): btTransform;
+        getAxis(axis_index: number): btVector3;
+        getAngle(axis_index: number): number;
+        getRelativePivotPosition(axis_index: number): number;
+        setFrames(frameA: btTransform, frameB: btTransform): void;
+        testAngularLimitMotor(axis_index: number): boolean;
+        getLinearLowerLimit(linearLower: btVector3): void;
+        getLinearUpperLimit(linearUpper: btVector3): void;
+        getAngularLowerLimit(angularLower: btVector3): void;
+        getAngularUpperLimit(angularUpper: btVector3): void;
         setLinearLowerLimit(linearLower: btVector3): void;
         setLinearUpperLimit(linearUpper: btVector3): void;
         setAngularLowerLimit(angularLower: btVector3): void;
         setAngularUpperLimit(angularUpper: btVector3): void;
-        getFrameOffsetA(): btTransform;
     }
     class btGeneric6DofSpringConstraint extends btGeneric6DofConstraint {
         constructor(rbA: btRigidBody, rbB: btRigidBody, frameInA: btTransform, frameInB: btTransform, useLinearFrameReferenceFrameA: boolean);
@@ -920,6 +992,7 @@ declare module Ammo {
         convexSweepTest(castShape: btConvexShape, from: btTransform, to: btTransform, resultCallback: ConvexResultCallback, allowedCcdPenetration: number): void;
         contactPairTest(colObjA: btCollisionObject, colObjB: btCollisionObject, resultCallback: ContactResultCallback): void;
         contactTest(colObj: btCollisionObject, resultCallback: ContactResultCallback): void;
+        setForceUpdateAllAabbs(forceUpdateAllAabbs: boolean): void;
         updateSingleAabb(colObj: btCollisionObject): void;
         setDebugDrawer(debugDrawer: btIDebugDraw): void;
         getDebugDrawer(): btIDebugDraw;
@@ -1481,6 +1554,11 @@ declare module Ammo {
     }
     class HACD {
         constructor();
+        SetCompacityWeight(alpha: number): void;
+        SetVolumeWeight(beta: number): void;
+        SetConcavity(concavity: number): void;
+        SetNClusters(nClusters: number): void;
+        SetNVerticesPerCH(nVerticesPerCH: number): void;
         SetPoints(points: Vec3Real): void;
         SetNPoints(nPoints: number): void;
         SetTriangles(triangles: Vec3Long): void;
